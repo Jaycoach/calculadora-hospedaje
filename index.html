@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Hospedaje</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --light-bg: #f5f5f5;
+            --dark-bg: #333;
+            --text-color: #333;
+            --light-text: #fff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            font-weight: normal;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+            outline: none;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 10px 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .stays-container {
+            margin-top: 20px;
+        }
+        
+        .stay-item {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .remove-stay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+        
+        .results {
+            margin-top: 30px;
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .results h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .results-table th, .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .results-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .results-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .results-total {
+            text-align: right;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: var(--accent-color);
+        }
+        
+        .property-total {
+            text-align: right;
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--primary-color);
+            padding-right: 10px;
+        }
+        
+        .property-section {
+            background-color: #f1f9fe;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .property-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .date-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .date-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .date-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Hospedaje</h1>
+        <p class="subtitle">Calcula el costo total de tus estadías en múltiples propiedades</p>
+        
+        <div class="form-section">
+            <div class="property-section">
+                <h3>Información de Propiedades</h3>
+                <div id="properties-container">
+                    <div class="property-item">
+                        <div class="form-group">
+                            <label for="property-name-1">Nombre de la Propiedad</label>
+                            <input type="text" id="property-name-1" placeholder="Ej: Casa de la Playa" value="Casa de la Playa" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="monthly-rate-1">Tarifa Mensual (€)</label>
+                            <input type="number" id="monthly-rate-1" placeholder="Ej: 1500" min="1" value="1500" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-container">
+                    <button type="button" id="add-property" class="btn-secondary">
+                        <i class="fas fa-plus"></i> Agregar Otra Propiedad
+                    </button>
+                </div>
+            </div>
+            
+            <h3>Registrar Estadías</h3>
+            <div id="stays-container">
+                <!-- Aquí se agregarán dinámicamente las estadías -->
+            </div>
+            
+            <div class="btn-container">
+                <button type="button" id="add-stay">
+                    <i class="fas fa-plus"></i> Agregar Estadía
+                </button>
+                <button type="button" id="calculate">
+                    <i class="fas fa-calculator"></i> Calcular Total
+                </button>
+            </div>
+        </div>
+        
+        <div id="results" class="results" style="display: none;">
+            <h2>Resumen de Estadías</h2>
+            <div id="results-content"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let propertyCount = 1;
+            let stayCount = 0;
+            
+            // Agregar propiedad
+            document.getElementById('add-property').addEventListener('click', function() {
+                propertyCount++;
+                const propertyHTML = `
+                    <div class="property-item" id="property-${propertyCount}">
+                        <div class="form-group">
+                            <label for="property-name-${propertyCount}">Nombre de la Propiedad</label>
+                            <input type="text" id="property-name-${propertyCount}" placeholder="Ej: Casa del Centro" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="monthly-rate-${propertyCount}">Tarifa Mensual (€)</label>
+                            <input type="number" id="monthly-rate-${propertyCount}" placeholder="Ej: 1200" min="1" required>
+                        </div>
+                        <button type="button" class="btn-danger remove-property" data-id="${propertyCount}">
+                            <i class="fas fa-trash"></i> Eliminar Propiedad
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('properties-container').insertAdjacentHTML('beforeend', propertyHTML);
+                
+                // Agregar event listener al botón de eliminar
+                document.querySelector(`.remove-property[data-id="${propertyCount}"]`).addEventListener('click', function() {
+                    document.getElementById(`property-${this.dataset.id}`).remove();
+                    updatePropertyDropdowns();
+                });
+                
+                updatePropertyDropdowns();
+            });
+            
+            // Agregar estadía
+            document.getElementById('add-stay').addEventListener('click', addStay);
+            
+            // Calcular total
+            document.getElementById('calculate').addEventListener('click', calculateTotal);
+            
+            // Inicialmente agregar una estadía
+            addStay();
+            
+            // Función para agregar una nueva estadía
+            function addStay() {
+                stayCount++;
+                
+                // Crear opciones para el dropdown de propiedades
+                let propertyOptions = '';
+                for (let i = 1; i <= propertyCount; i++) {
+                    const propertyName = document.getElementById(`property-name-${i}`).value || `Propiedad ${i}`;
+                    propertyOptions += `<option value="${i}">${propertyName}</option>`;
+                }
+                
+                const stayHTML = `
+                    <div class="stay-item" id="stay-${stayCount}">
+                        <button type="button" class="remove-stay" data-id="${stayCount}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        
+                        <div class="form-group">
+                            <label for="property-${stayCount}">Propiedad</label>
+                            <select id="property-${stayCount}" class="property-select" required>
+                                ${propertyOptions}
+                            </select>
+                        </div>
+                        
+                        <div class="date-row">
+                            <div class="form-group">
+                                <label for="check-in-${stayCount}">Fecha de Entrada</label>
+                                <input type="date" id="check-in-${stayCount}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="check-out-${stayCount}">Fecha de Salida</label>
+                                <input type="date" id="check-out-${stayCount}" required>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('stays-container').insertAdjacentHTML('beforeend', stayHTML);
+                
+                // Agregar event listener al botón de eliminar
+                document.querySelector(`.remove-stay[data-id="${stayCount}"]`).addEventListener('click', function() {
+                    document.getElementById(`stay-${this.dataset.id}`).remove();
+                });
+                
+                // No establecer fechas mínimas para permitir seleccionar cualquier fecha
+                // Dejamos la posibilidad de elegir cualquier fecha del calendario
+                
+                // Actualizar fecha de salida mínima cuando cambia la fecha de entrada
+                // pero manteniendo la flexibilidad para elegir cualquier fecha
+                document.getElementById(`check-in-${stayCount}`).addEventListener('change', function() {
+                    // Si hay una fecha de salida y es anterior a la entrada, mostrar una alerta
+                    const checkOut = document.getElementById(`check-out-${stayCount}`);
+                    if (checkOut.value && new Date(checkOut.value) < new Date(this.value)) {
+                        alert('La fecha de salida no puede ser anterior a la fecha de entrada.');
+                        checkOut.value = this.value;
+                    }
+                });
+            }
+            
+            // Función para actualizar los dropdowns de propiedades
+            function updatePropertyDropdowns() {
+                const propertySelects = document.querySelectorAll('.property-select');
+                
+                propertySelects.forEach(select => {
+                    const selectedValue = select.value;
+                    
+                    // Limpiar opciones actuales
+                    select.innerHTML = '';
+                    
+                    // Agregar nuevas opciones
+                    for (let i = 1; i <= propertyCount; i++) {
+                        if (document.getElementById(`property-name-${i}`)) {
+                            const propertyName = document.getElementById(`property-name-${i}`).value || `Propiedad ${i}`;
+                            const option = document.createElement('option');
+                            option.value = i;
+                            option.textContent = propertyName;
+                            select.appendChild(option);
+                        }
+                    }
+                    
+                    // Restaurar valor seleccionado si existe
+                    if (selectedValue && document.getElementById(`property-name-${selectedValue}`)) {
+                        select.value = selectedValue;
+                    }
+                });
+            }
+            
+            // Función para calcular el total
+            function calculateTotal() {
+                const stays = document.querySelectorAll('.stay-item');
+                const stayData = [];
+                let isValid = true;
+                
+                // Validar propiedades
+                for (let i = 1; i <= propertyCount; i++) {
+                    const nameInput = document.getElementById(`property-name-${i}`);
+                    const rateInput = document.getElementById(`monthly-rate-${i}`);
+                    
+                    if (nameInput && !nameInput.value) {
+                        nameInput.style.borderColor = 'red';
+                        isValid = false;
+                    } else if (nameInput) {
+                        nameInput.style.borderColor = '';
+                    }
+                    
+                    if (rateInput && (!rateInput.value || rateInput.value <= 0)) {
+                        rateInput.style.borderColor = 'red';
+                        isValid = false;
+                    } else if (rateInput) {
+                        rateInput.style.borderColor = '';
+                    }
+                }
+                
+                // Recopilar datos de estadías
+                stays.forEach(stay => {
+                    const stayId = stay.id.split('-')[1];
+                    const propertyId = document.getElementById(`property-${stayId}`).value;
+                    const checkIn = document.getElementById(`check-in-${stayId}`).value;
+                    const checkOut = document.getElementById(`check-out-${stayId}`).value;
+                    
+                    if (!checkIn) {
+                        document.getElementById(`check-in-${stayId}`).style.borderColor = 'red';
+                        isValid = false;
+                    } else {
+                        document.getElementById(`check-in-${stayId}`).style.borderColor = '';
+                    }
+                    
+                    if (!checkOut) {
+                        document.getElementById(`check-out-${stayId}`).style.borderColor = 'red';
+                        isValid = false;
+                    } else {
+                        document.getElementById(`check-out-${stayId}`).style.borderColor = '';
+                    }
+                    
+                    if (checkIn && checkOut && new Date(checkOut) <= new Date(checkIn)) {
+                        document.getElementById(`check-out-${stayId}`).style.borderColor = 'red';
+                        isValid = false;
+                    }
+                    
+                    if (checkIn && checkOut && propertyId) {
+                        const propertyName = document.getElementById(`property-name-${propertyId}`).value;
+                        const monthlyRate = parseFloat(document.getElementById(`monthly-rate-${propertyId}`).value);
+                        
+                        stayData.push({
+                            property: propertyName,
+                            propertyId: propertyId,
+                            checkIn: new Date(checkIn),
+                            checkOut: new Date(checkOut),
+                            monthlyRate: monthlyRate
+                        });
+                    }
+                });
+                
+                if (!isValid) {
+                    alert('Por favor, completa todos los campos requeridos correctamente.');
+                    return;
+                }
+                
+                if (stayData.length === 0) {
+                    alert('No hay estadías para calcular.');
+                    return;
+                }
+                
+                // Calcular costos y generar resumen
+                const resultsElement = document.getElementById('results');
+                const resultsContentElement = document.getElementById('results-content');
+                
+                // Ordenar estadías por propiedad y fecha
+                stayData.sort((a, b) => {
+                    if (a.propertyId === b.propertyId) {
+                        return a.checkIn - b.checkIn;
+                    }
+                    return a.propertyId - b.propertyId;
+                });
+                
+                // Generar HTML para resultados
+                let resultsHTML = '';
+                let grandTotal = 0;
+                let currentProperty = '';
+                let propertyTotals = {};
+                
+                resultsHTML += `<div class="results-tables">`;
+                
+                stayData.forEach((stay, index) => {
+                    // Si cambiamos de propiedad, crear nueva sección
+                    if (stay.property !== currentProperty) {
+                        if (index > 0) {
+                            resultsHTML += `</tbody></table>`;
+                            // Agregar total por propiedad
+                            if (propertyTotals[currentProperty]) {
+                                resultsHTML += `<div class="property-total">Total ${currentProperty}: €${propertyTotals[currentProperty].toFixed(2)}</div>`;
+                            }
+                            resultsHTML += `</div>`;
+                        }
+                        
+                        // Inicializar total de esta propiedad si no existe
+                        if (!propertyTotals[stay.property]) {
+                            propertyTotals[stay.property] = 0;
+                        }
+                        
+                        currentProperty = stay.property;
+                        resultsHTML += `
+                            <div class="property-results">
+                                <h3>${stay.property}</h3>
+                                <p>Tarifa mensual: €${stay.monthlyRate.toFixed(2)}</p>
+                                <table class="results-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Entrada</th>
+                                            <th>Salida</th>
+                                            <th>Días</th>
+                                            <th>Tarifa Diaria</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+                    }
+                    
+                    // Calcular días y costo
+                    const timeDiff = stay.checkOut.getTime() - stay.checkIn.getTime();
+                    const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    const dailyRate = stay.monthlyRate / 30; // Aproximación de tarifa diaria
+                    const totalCost = days * dailyRate;
+                    
+                    // Sumar al total de la propiedad y al total general
+                    propertyTotals[stay.property] += totalCost;
+                    grandTotal += totalCost;
+                    
+                    // Formatear fechas
+                    const formatDate = (date) => {
+                        return date.toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+                    };
+                    
+                    resultsHTML += `
+                        <tr>
+                            <td>${formatDate(stay.checkIn)}</td>
+                            <td>${formatDate(stay.checkOut)}</td>
+                            <td>${days}</td>
+                            <td>€${dailyRate.toFixed(2)}</td>
+                            <td>€${totalCost.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+                
+                // Agregar el último total por propiedad
+                resultsHTML += `</tbody></table>`;
+                if (propertyTotals[currentProperty]) {
+                    resultsHTML += `<div class="property-total">Total ${currentProperty}: €${propertyTotals[currentProperty].toFixed(2)}</div>`;
+                }
+                resultsHTML += `</div></div>`;
+                
+                // Agregar el total general
+                resultsHTML += `<div class="results-total">Total a Pagar: €${grandTotal.toFixed(2)}</div>`;
+                
+                resultsContentElement.innerHTML = resultsHTML;
+                resultsElement.style.display = 'block';
+                
+                // Desplazarse hasta los resultados
+                resultsElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    </script>
+</body>
+</html>
