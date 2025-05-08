@@ -503,6 +503,11 @@
                 let currentProperty = '';
                 let propertyTotals = {};
                 
+                // Inicializar los totales de cada propiedad a 0
+                stayData.forEach(stay => {
+                    propertyTotals[stay.property] = propertyTotals[stay.property] || 0;
+                });
+                
                 resultsHTML += `<div class="results-tables">`;
                 
                 stayData.forEach((stay, index) => {
@@ -564,6 +569,7 @@
                     `;
                 });
                 
+                // Cerrar la última tabla y mostrar el total de la última propiedad
                 resultsHTML += `</tbody></table>`;
                 if (currentProperty) {
                     resultsHTML += `<div class="property-total">Total ${currentProperty}: €${propertyTotals[currentProperty].toFixed(2)}</div>`;
