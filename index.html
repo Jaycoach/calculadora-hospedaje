@@ -511,15 +511,8 @@
                         if (index > 0) {
                             resultsHTML += `</tbody></table>`;
                             // Agregar total por propiedad
-                            if (propertyTotals[currentProperty]) {
-                                resultsHTML += `<div class="property-total">Total ${currentProperty}: €${propertyTotals[currentProperty].toFixed(2)}</div>`;
-                            }
+                            resultsHTML += `<div class="property-total">Total ${currentProperty}: €${propertyTotals[currentProperty].toFixed(2)}</div>`;
                             resultsHTML += `</div>`;
-                        }
-                        
-                        // Inicializar total de esta propiedad si no existe
-                        if (!propertyTotals[stay.property]) {
-                            propertyTotals[stay.property] = 0;
                         }
                         
                         currentProperty = stay.property;
@@ -571,9 +564,8 @@
                     `;
                 });
                 
-                // Agregar el último total por propiedad
                 resultsHTML += `</tbody></table>`;
-                if (propertyTotals[currentProperty]) {
+                if (currentProperty) {
                     resultsHTML += `<div class="property-total">Total ${currentProperty}: €${propertyTotals[currentProperty].toFixed(2)}</div>`;
                 }
                 resultsHTML += `</div></div>`;
