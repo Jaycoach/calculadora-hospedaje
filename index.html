@@ -227,6 +227,16 @@
                 gap: 0;
             }
         }
+        
+        .debug-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
@@ -328,8 +338,11 @@
                 // Crear opciones para el dropdown de propiedades
                 let propertyOptions = '';
                 for (let i = 1; i <= propertyCount; i++) {
-                    const propertyName = document.getElementById(`property-name-${i}`).value || `Propiedad ${i}`;
-                    propertyOptions += `<option value="${i}">${propertyName}</option>`;
+                    const propertyNameElement = document.getElementById(`property-name-${i}`);
+                    if (propertyNameElement) {
+                        const propertyName = propertyNameElement.value || `Propiedad ${i}`;
+                        propertyOptions += `<option value="${i}">${propertyName}</option>`;
+                    }
                 }
                 
                 const stayHTML = `
@@ -366,11 +379,7 @@
                     document.getElementById(`stay-${this.dataset.id}`).remove();
                 });
                 
-                // No establecer fechas mínimas para permitir seleccionar cualquier fecha
-                // Dejamos la posibilidad de elegir cualquier fecha del calendario
-                
                 // Actualizar fecha de salida mínima cuando cambia la fecha de entrada
-                // pero manteniendo la flexibilidad para elegir cualquier fecha
                 document.getElementById(`check-in-${stayCount}`).addEventListener('change', function() {
                     // Si hay una fecha de salida y es anterior a la entrada, mostrar una alerta
                     const checkOut = document.getElementById(`check-out-${stayCount}`);
@@ -393,8 +402,9 @@
                     
                     // Agregar nuevas opciones
                     for (let i = 1; i <= propertyCount; i++) {
-                        if (document.getElementById(`property-name-${i}`)) {
-                            const propertyName = document.getElementById(`property-name-${i}`).value || `Propiedad ${i}`;
+                        const propertyNameElement = document.getElementById(`property-name-${i}`);
+                        if (propertyNameElement) {
+                            const propertyName = propertyNameElement.value || `Propiedad ${i}`;
                             const option = document.createElement('option');
                             option.value = i;
                             option.textContent = propertyName;
@@ -416,62 +426,80 @@
                 let isValid = true;
                 
                 // Validar propiedades
+                const existingPropertyIds = [];
                 for (let i = 1; i <= propertyCount; i++) {
                     const nameInput = document.getElementById(`property-name-${i}`);
                     const rateInput = document.getElementById(`monthly-rate-${i}`);
                     
-                    if (nameInput && !nameInput.value) {
-                        nameInput.style.borderColor = 'red';
-                        isValid = false;
-                    } else if (nameInput) {
-                        nameInput.style.borderColor = '';
-                    }
-                    
-                    if (rateInput && (!rateInput.value || rateInput.value <= 0)) {
-                        rateInput.style.borderColor = 'red';
-                        isValid = false;
-                    } else if (rateInput) {
-                        rateInput.style.borderColor = '';
+                    if (nameInput && rateInput) {
+                        existingPropertyIds.push(i);
+                        
+                        if (!nameInput.value) {
+                            nameInput.style.borderColor = 'red';
+                            isValid = false;
+                        } else {
+                            nameInput.style.borderColor = '';
+                        }
+                        
+                        if (!rateInput.value || rateInput.value <= 0) {
+                            rateInput.style.borderColor = 'red';
+                            isValid = false;
+                        } else {
+                            rateInput.style.borderColor = '';
+                        }
                     }
                 }
                 
                 // Recopilar datos de estadías
                 stays.forEach(stay => {
                     const stayId = stay.id.split('-')[1];
-                    const propertyId = document.getElementById(`property-${stayId}`).value;
-                    const checkIn = document.getElementById(`check-in-${stayId}`).value;
-                    const checkOut = document.getElementById(`check-out-${stayId}`).value;
+                    const propertySelect = document.getElementById(`property-${stayId}`);
+                    const checkInInput = document.getElementById(`check-in-${stayId}`);
+                    const checkOutInput = document.getElementById(`check-out-${stayId}`);
+                    
+                    if (!propertySelect || !checkInInput || !checkOutInput) {
+                        return; // Skip if any element is missing
+                    }
+                    
+                    const propertyId = propertySelect.value;
+                    const checkIn = checkInInput.value;
+                    const checkOut = checkOutInput.value;
                     
                     if (!checkIn) {
-                        document.getElementById(`check-in-${stayId}`).style.borderColor = 'red';
+                        checkInInput.style.borderColor = 'red';
                         isValid = false;
                     } else {
-                        document.getElementById(`check-in-${stayId}`).style.borderColor = '';
+                        checkInInput.style.borderColor = '';
                     }
                     
                     if (!checkOut) {
-                        document.getElementById(`check-out-${stayId}`).style.borderColor = 'red';
+                        checkOutInput.style.borderColor = 'red';
                         isValid = false;
                     } else {
-                        document.getElementById(`check-out-${stayId}`).style.borderColor = '';
+                        checkOutInput.style.borderColor = '';
                     }
                     
                     if (checkIn && checkOut && new Date(checkOut) <= new Date(checkIn)) {
-                        document.getElementById(`check-out-${stayId}`).style.borderColor = 'red';
+                        checkOutInput.style.borderColor = 'red';
                         isValid = false;
                     }
                     
                     if (checkIn && checkOut && propertyId) {
-                        const propertyName = document.getElementById(`property-name-${propertyId}`).value;
-                        const monthlyRate = parseFloat(document.getElementById(`monthly-rate-${propertyId}`).value);
+                        const propertyNameElement = document.getElementById(`property-name-${propertyId}`);
+                        const monthlyRateElement = document.getElementById(`monthly-rate-${propertyId}`);
                         
-                        stayData.push({
-                            property: propertyName,
-                            propertyId: propertyId,
-                            checkIn: new Date(checkIn),
-                            checkOut: new Date(checkOut),
-                            monthlyRate: monthlyRate
-                        });
+                        if (propertyNameElement && monthlyRateElement) {
+                            const propertyName = propertyNameElement.value;
+                            const monthlyRate = parseFloat(monthlyRateElement.value);
+                            
+                            stayData.push({
+                                property: propertyName,
+                                propertyId: propertyId,
+                                checkIn: new Date(checkIn),
+                                checkOut: new Date(checkOut),
+                                monthlyRate: monthlyRate
+                            });
+                        }
                     }
                 });
                 
@@ -500,85 +528,92 @@
                 // Generar HTML para resultados
                 let resultsHTML = '';
                 let grandTotal = 0;
-                let currentProperty = '';
                 let propertyTotals = {};
+                let propertyGroups = {};
                 
-                // Inicializar los totales de cada propiedad a 0
+                // Agrupar estadías por propiedad
                 stayData.forEach(stay => {
-                    propertyTotals[stay.property] = propertyTotals[stay.property] || 0;
-                });
-                
-                resultsHTML += `<div class="results-tables">`;
-                
-                stayData.forEach((stay, index) => {
-                    // Si cambiamos de propiedad, crear nueva sección
-                    if (stay.property !== currentProperty) {
-                        if (index > 0) {
-                            resultsHTML += `</tbody></table>`;
-                            // Agregar total por propiedad
-                            resultsHTML += `<div class="property-total">Total ${currentProperty}: €${propertyTotals[currentProperty].toFixed(2)}</div>`;
-                            resultsHTML += `</div>`;
-                        }
-                        
-                        currentProperty = stay.property;
-                        resultsHTML += `
-                            <div class="property-results">
-                                <h3>${stay.property}</h3>
-                                <p>Tarifa mensual: €${stay.monthlyRate.toFixed(2)}</p>
-                                <table class="results-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Entrada</th>
-                                            <th>Salida</th>
-                                            <th>Días</th>
-                                            <th>Tarifa Diaria</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                        `;
+                    if (!propertyGroups[stay.property]) {
+                        propertyGroups[stay.property] = [];
                     }
+                    propertyGroups[stay.property].push(stay);
                     
-                    // Calcular días y costo
-                    const timeDiff = stay.checkOut.getTime() - stay.checkIn.getTime();
-                    const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                    const dailyRate = stay.monthlyRate / 30; // Aproximación de tarifa diaria
-                    const totalCost = days * dailyRate;
-                    
-                    // Sumar al total de la propiedad y al total general
-                    propertyTotals[stay.property] += totalCost;
-                    grandTotal += totalCost;
-                    
-                    // Formatear fechas
-                    const formatDate = (date) => {
-                        return date.toLocaleDateString('es-ES', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        });
-                    };
-                    
-                    resultsHTML += `
-                        <tr>
-                            <td>${formatDate(stay.checkIn)}</td>
-                            <td>${formatDate(stay.checkOut)}</td>
-                            <td>${days}</td>
-                            <td>€${dailyRate.toFixed(2)}</td>
-                            <td>€${totalCost.toFixed(2)}</td>
-                        </tr>
-                    `;
+                    // Inicializar el total de la propiedad si no existe
+                    propertyTotals[stay.property] = 0;
                 });
                 
-                // Cerrar la última tabla y mostrar el total de la última propiedad
-                resultsHTML += `</tbody></table>`;
-                if (currentProperty) {
-                    resultsHTML += `<div class="property-total">Total ${currentProperty}: €${propertyTotals[currentProperty].toFixed(2)}</div>`;
+                // Generar HTML para cada propiedad
+                for (const property in propertyGroups) {
+                    if (propertyGroups.hasOwnProperty(property)) {
+                        const staysForProperty = propertyGroups[property];
+                        
+                        if (staysForProperty.length > 0) {
+                            const monthlyRate = staysForProperty[0].monthlyRate; // Tomamos la tarifa del primer registro
+                            
+                            resultsHTML += `
+                                <div class="property-results">
+                                    <h3>${property}</h3>
+                                    <p>Tarifa mensual: €${monthlyRate.toFixed(2)}</p>
+                                    <table class="results-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Entrada</th>
+                                                <th>Salida</th>
+                                                <th>Días</th>
+                                                <th>Tarifa Diaria</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                            `;
+                            
+                            // Generar filas para cada estadía de esta propiedad
+                            staysForProperty.forEach(stay => {
+                                // Calcular días y costo
+                                const timeDiff = stay.checkOut.getTime() - stay.checkIn.getTime();
+                                const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                                const dailyRate = stay.monthlyRate / 30; // Aproximación de tarifa diaria
+                                const totalCost = days * dailyRate;
+                                
+                                // Sumar al total de la propiedad y al total general
+                                propertyTotals[stay.property] += totalCost;
+                                grandTotal += totalCost;
+                                
+                                // Formatear fechas
+                                const formatDate = (date) => {
+                                    return date.toLocaleDateString('es-ES', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric'
+                                    });
+                                };
+                                
+                                resultsHTML += `
+                                    <tr>
+                                        <td>${formatDate(stay.checkIn)}</td>
+                                        <td>${formatDate(stay.checkOut)}</td>
+                                        <td>${days}</td>
+                                        <td>€${dailyRate.toFixed(2)}</td>
+                                        <td>€${totalCost.toFixed(2)}</td>
+                                    </tr>
+                                `;
+                            });
+                            
+                            // Cerrar la tabla y mostrar el total de la propiedad
+                            resultsHTML += `
+                                        </tbody>
+                                    </table>
+                                    <div class="property-total">Total ${property}: €${propertyTotals[property].toFixed(2)}</div>
+                                </div>
+                            `;
+                        }
+                    }
                 }
-                resultsHTML += `</div></div>`;
                 
                 // Agregar el total general
                 resultsHTML += `<div class="results-total">Total a Pagar: €${grandTotal.toFixed(2)}</div>`;
                 
+                // Mostrar los resultados
                 resultsContentElement.innerHTML = resultsHTML;
                 resultsElement.style.display = 'block';
                 
